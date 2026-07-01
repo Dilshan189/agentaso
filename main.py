@@ -12,12 +12,24 @@ from crewai import LLM
 
 # Set up the LLM
 llm_instance = None
-if os.environ.get("GEMINI_API_KEY"):
+if os.environ.get("GROQ_API_KEY"):
+    import litellm
+    original_completion = litellm.completion
+    def patched_completion(*args, **kwargs):
+        if "messages" in kwargs:
+            for msg in kwargs["messages"]:
+                if "cache_breakpoint" in msg:
+                    del msg["cache_breakpoint"]
+        return original_completion(*args, **kwargs)
+    litellm.completion = patched_completion
+
+    llm_instance = LLM(model="groq/llama-3.1-8b-instant", api_key=os.environ.get("GROQ_API_KEY"))
+elif os.environ.get("GEMINI_API_KEY"):
     llm_instance = LLM(model="gemini/gemini-2.5-flash-lite", api_key=os.environ.get("GEMINI_API_KEY"))
 elif os.environ.get("OPENAI_API_KEY"):
     llm_instance = LLM(model="gpt-3.5-turbo", api_key=os.environ.get("OPENAI_API_KEY"))
 else:
-    print("Warning: No API key found. Please create a .env file and add your OPENAI_API_KEY or GEMINI_API_KEY.")
+    print("Warning: No API key found. Please create a .env file and add your GROQ_API_KEY, OPENAI_API_KEY or GEMINI_API_KEY.")
 
 # Define Agents
 researcher = Agent(
