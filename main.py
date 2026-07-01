@@ -13,7 +13,7 @@ from crewai import LLM
 # Set up the LLM
 llm_instance = None
 if os.environ.get("GEMINI_API_KEY"):
-    llm_instance = LLM(model="gemini/gemini-2.5-flash", api_key=os.environ.get("GEMINI_API_KEY"))
+    llm_instance = LLM(model="gemini/gemini-2.5-flash-lite", api_key=os.environ.get("GEMINI_API_KEY"))
 elif os.environ.get("OPENAI_API_KEY"):
     llm_instance = LLM(model="gpt-3.5-turbo", api_key=os.environ.get("OPENAI_API_KEY"))
 else:
