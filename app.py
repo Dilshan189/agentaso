@@ -84,7 +84,9 @@ if generate_btn:
                     results.get("design", "")
                 )
                 
-                if isinstance(pdf_bytes, str):
+                if isinstance(pdf_bytes, bytearray):
+                    pdf_bytes = bytes(pdf_bytes)
+                elif isinstance(pdf_bytes, str):
                     pdf_bytes = pdf_bytes.encode('latin-1', 'replace')
                 
                 st.download_button(
