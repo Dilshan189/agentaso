@@ -42,11 +42,9 @@ copywriter = Agent(
 )
 
 marketing_strategist = Agent(
-    role='App Launch Marketing Strategist',
-    goal='Generate explosive initial growth for the app using the ASO copy and niche details.',
-    backstory='You are a top-tier Growth Hacker and Marketing Strategist. Your expertise lies in launching apps '
-              'and getting 1000+ downloads within the first 3 days. You craft viral TikTok scripts, highly converting '
-              'Facebook/Instagram Ads, and solid 3-day launch plans.',
+    role='Zero-Budget Organic Growth Hacker',
+    goal='Generate explosive initial growth for the app using ONLY free, organic traffic channels like TikTok, Shorts, and Communities.',
+    backstory='You are a top-tier Organic Growth Hacker. Your expertise lies in launching apps without a marketing budget. You know exactly how to craft viral TikTok/Reels/Shorts scripts, engaging Reddit/Quora posts, and solid zero-budget launch plans to get 1000+ downloads purely organically.',
     verbose=True,
     allow_delegation=False,
     llm=llm_instance
@@ -84,12 +82,12 @@ def run_aso_process(competitor_app_ids: list, target_niche: str):
     )
 
     marketing_task = Task(
-        description=f'Using the App Title and Description written by the copywriter, formulate a massive initial launch strategy.\n'
+        description=f'Using the App Title and Description written by the copywriter, formulate a massive zero-budget organic launch strategy.\n'
                     f'Requirements:\n'
-                    f'- Write 3 high-converting Ad Copies for Facebook/Instagram.\n'
-                    f'- Write 2 viral video scripts (under 30 seconds each) for TikTok/Reels/Shorts influencers.\n'
-                    f'- Provide a bulleted 3-day step-by-step launch plan to achieve 1,000+ downloads immediately.',
-        expected_output='A full App Launch Marketing Suite document containing Ad Copies, Video Scripts, and a 3-Day Launch Plan.',
+                    f'- Write 3 highly engaging Community Posts (for Reddit, Facebook Groups, or Quora) to drive free traffic without sounding spammy.\n'
+                    f'- Write 3 viral video scripts (under 30 seconds each) for TikTok/Instagram Reels/YouTube Shorts.\n'
+                    f'- Provide a bulleted 3-day step-by-step Zero-Budget launch plan to achieve 1,000+ downloads organically.',
+        expected_output='A full Organic App Launch Marketing Suite document containing Community Posts, Viral Video Scripts, and a Zero-Budget 3-Day Launch Plan.',
         agent=marketing_strategist
     )
 
