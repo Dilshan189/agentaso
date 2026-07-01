@@ -38,7 +38,7 @@ def create_pdf(aso_copy, marketing, design):
     except Exception as e:
         return pdf.output(dest='S').encode('latin-1')
 
-st.title("🚀 App Store Optimization (ASO) AI Agent")
+st.title("🚀 Dilshan App Store Optimization (ASO) AI Agent")
 st.markdown("Enter your app's niche and the IDs of your top competitors to generate a complete ASO strategy, marketing plan, and screenshot designs.")
 
 with st.sidebar:
