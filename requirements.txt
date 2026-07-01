@@ -1,0 +1,6 @@
+crewai
+langchain
+langchain-openai
+langchain-google-genai
+google-play-scraper
+python-dotenv

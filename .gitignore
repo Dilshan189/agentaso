@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+aso_results.txt
