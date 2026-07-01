@@ -52,12 +52,23 @@ marketing_strategist = Agent(
     llm=llm_instance
 )
 
-def run_aso_process(competitor_app_id: str, target_niche: str):
+ui_ux_designer = Agent(
+    role='App Store UI/UX Designer',
+    goal='Generate compelling App Store screenshot concepts and design layouts.',
+    backstory='You are a top-tier UI/UX Designer with a strong track record of designing App Store screenshots that maximize conversion rates. You know exactly what visual elements and copy to include in each screenshot.',
+    verbose=True,
+    allow_delegation=False,
+    llm=llm_instance
+)
+
+def run_aso_process(competitor_app_ids: list, target_niche: str):
+    competitors_str = ", ".join(competitor_app_ids)
+    
     # Define Tasks
     research_task = Task(
-        description=f'1. Analyze the competitor app with ID "{competitor_app_id}" to understand their positioning.\n'
+        description=f'1. Analyze the competitor apps with IDs "{competitors_str}" to understand their positioning. Use your tool to scrape data for each app ID separately.\n'
                     f'2. Identify 5-10 high-value keywords for an app in the "{target_niche}" niche.\n'
-                    f'3. Summarize the competitor\'s strengths and weaknesses in their current app store listing.',
+                    f'3. Summarize the competitors\' strengths and weaknesses in their current app store listings.',
         expected_output='A report containing competitor analysis, a list of 5-10 high-value keywords, and a summary of strengths/weaknesses.',
         agent=researcher
     )
@@ -82,73 +93,45 @@ def run_aso_process(competitor_app_id: str, target_niche: str):
         agent=marketing_strategist
     )
 
+    design_task = Task(
+        description=f'Using the App Title and Description written by the copywriter, conceptualize the App Store Screenshots.\n'
+                    f'Requirements:\n'
+                    f'- Provide detailed concepts for 5 App Store screenshots.\n'
+                    f'- For each screenshot, specify the main headline text, any subtext, and describe the visual design/layout.\n'
+                    f'- The first screenshot should be the most impactful "hero" image.',
+        expected_output='A document outlining 5 screenshot concepts with specific copy and design descriptions for each.',
+        agent=ui_ux_designer
+    )
+
     # Assemble the Crew
     crew = Crew(
-        agents=[researcher, copywriter, marketing_strategist],
-        tasks=[research_task, writing_task, marketing_task],
+        agents=[researcher, copywriter, marketing_strategist, ui_ux_designer],
+        tasks=[research_task, writing_task, marketing_task, design_task],
         process=Process.sequential
     )
 
-    print(f"Starting ASO Crew Process for niche '{target_niche}' against competitor '{competitor_app_id}'...\n")
+    print(f"Starting ASO Crew Process for niche '{target_niche}' against competitors '{competitors_str}'...\n")
     result = crew.kickoff()
     
-    print("######################")
-    print("FINAL ASO RESULT")
-    print("######################")
+    # Extract individual task outputs safely
+    def get_output(task):
+        if hasattr(task, 'output') and task.output is not None:
+            if hasattr(task.output, 'raw'):
+                return str(task.output.raw)
+            return str(task.output)
+        return ""
     
-    # Safely print to console avoiding UnicodeEncodeError on Windows
-    try:
-        print(str(result).encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding))
-    except Exception:
-        print("Result generated successfully (printing skipped due to terminal encoding).")
-    
-    # Save to a file
-    with open("aso_results.txt", "w", encoding="utf-8") as f:
-        f.write("==================================================\n")
-        f.write("      ASO COPY (Title, Short & Long Description)  \n")
-        f.write("==================================================\n\n")
-        f.write(str(writing_task.output.raw if hasattr(writing_task.output, 'raw') else writing_task.output))
-        f.write("\n\n\n==================================================\n")
-        f.write("      MARKETING LAUNCH SUITE (Ads & Strategy)     \n")
-        f.write("==================================================\n\n")
-        f.write(str(marketing_task.output.raw if hasattr(marketing_task.output, 'raw') else marketing_task.output))
-        
-    print("\nResults saved to aso_results.txt")
-
-    # Send result via email if configured
-    receiver_email = os.environ.get("RECEIVER_EMAIL")
-    sender_email = os.environ.get("SENDER_EMAIL")
-    sender_password = os.environ.get("SENDER_PASSWORD")
-    
-    if receiver_email and sender_email and sender_password:
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
-        
-        try:
-            msg = MIMEMultipart()
-            msg['From'] = sender_email
-            msg['To'] = receiver_email
-            msg['Subject'] = f"ASO Results for {target_niche} App"
-            
-            msg.attach(MIMEText(str(result), 'plain', 'utf-8'))
-            
-            # Using Gmail SMTP as default
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-            server.quit()
-            print(f"\nSuccessfully sent the results to {receiver_email}")
-        except Exception as e:
-            print(f"\nFailed to send email: {e}")
-    else:
-        print("\nEmail configuration not found in .env. Skipping email delivery.")
+    return {
+        "aso_copy": get_output(writing_task),
+        "marketing": get_output(marketing_task),
+        "design": get_output(design_task),
+        "full_result": str(result)
+    }
 
 if __name__ == "__main__":
-    # Example usage:
-    # Let's analyze a popular app, e.g., 'com.whatsapp' for a messaging app niche.
-    target_competitor = 'com.adobe.scan.android'
+    # Example usage for direct testing:
+    target_competitors = ['com.adobe.scan.android', 'com.intsig.camscanner']
     niche = 'OCR Scanner'
     
-    run_aso_process(target_competitor, niche)
+    results = run_aso_process(target_competitors, niche)
+    print(results["full_result"])
