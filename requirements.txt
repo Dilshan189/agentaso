@@ -6,3 +6,4 @@ google-play-scraper
 python-dotenv
 streamlit
 fpdf2
+litellm
