@@ -23,7 +23,7 @@ if os.environ.get("GROQ_API_KEY"):
         return original_completion(*args, **kwargs)
     litellm.completion = patched_completion
 
-    llm_instance = LLM(model="groq/llama-3.1-8b-instant", api_key=os.environ.get("GROQ_API_KEY"))
+    llm_instance = LLM(model="groq/llama-3.3-70b-versatile", api_key=os.environ.get("GROQ_API_KEY"))
 elif os.environ.get("GEMINI_API_KEY"):
     llm_instance = LLM(model="gemini/gemini-2.5-flash-lite", api_key=os.environ.get("GEMINI_API_KEY"))
 elif os.environ.get("OPENAI_API_KEY"):
@@ -143,5 +143,15 @@ if __name__ == "__main__":
     target_competitors = ['com.adobe.scan.android', 'com.intsig.camscanner']
     niche = 'OCR Scanner'
     
+    print(f"Running ASO Process for {niche}...")
     results = run_aso_process(target_competitors, niche)
-    print(results["full_result"])
+    
+    output_text = "=== ASO COPY ===\n" + results.get("aso_copy", "") + "\n\n"
+    output_text += "=== MARKETING PLAN ===\n" + results.get("marketing", "") + "\n\n"
+    output_text += "=== DESIGN CONCEPTS ===\n" + results.get("design", "") + "\n\n"
+    output_text += "=== FULL RESULT ===\n" + results.get("full_result", "")
+    
+    with open("aso_results.txt", "w", encoding="utf-8") as f:
+        f.write(output_text)
+        
+    print("\nProcess completed successfully! Results have been saved to 'aso_results.txt'")
