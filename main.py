@@ -146,6 +146,7 @@ if __name__ == "__main__":
     print(f"Running ASO Process for {niche}...")
     results = run_aso_process(target_competitors, niche)
     
+    # Write to TXT
     output_text = "=== ASO COPY ===\n" + results.get("aso_copy", "") + "\n\n"
     output_text += "=== MARKETING PLAN ===\n" + results.get("marketing", "") + "\n\n"
     output_text += "=== DESIGN CONCEPTS ===\n" + results.get("design", "") + "\n\n"
@@ -154,4 +155,31 @@ if __name__ == "__main__":
     with open("aso_results.txt", "w", encoding="utf-8") as f:
         f.write(output_text)
         
-    print("\nProcess completed successfully! Results have been saved to 'aso_results.txt'")
+    # Generate PDF
+    from fpdf import FPDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(0, 10, f"ASO AI Agent Report - {niche}", ln=True, align="C")
+    pdf.set_font("Arial", '', 12)
+    
+    sections = [
+        ("ASO Copy (Title & Description)", results.get("aso_copy", "")),
+        ("Marketing Launch Strategy", results.get("marketing", "")),
+        ("UI/UX Screenshot Ideas", results.get("design", ""))
+    ]
+    
+    for title, content in sections:
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', 14)
+        pdf.cell(0, 10, title, ln=True)
+        pdf.ln(5)
+        pdf.set_font("Arial", '', 11)
+        clean_content = content.encode('latin-1', 'replace').decode('latin-1')
+        pdf.multi_cell(0, 6, clean_content)
+        
+    pdf.output("ASO_Strategy_Report.pdf")
+        
+    print("\nProcess completed successfully!")
+    print("Results have been saved to 'aso_results.txt' AND 'ASO_Strategy_Report.pdf'")
+
